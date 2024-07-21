@@ -5,7 +5,9 @@ USE onlinecardretailer;
 -- It combines tables sales, customers and gift --
 CREATE VIEW vw_package_adress AS
 SELECT s.sales_id, 
-	c.first_name, c.last_name, c.house_number, c.street, c.town, c.postcode, 
+	c.first_name, c.last_name, 
+	c.house_number, c.street, 
+	c.town, c.postcode, 
 	s.gift_id, g.gifttype
 FROM Sales s
 INNER JOIN Customers c ON s.customer_id = c.customer_id
