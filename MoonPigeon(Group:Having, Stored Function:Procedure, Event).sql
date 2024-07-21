@@ -1,20 +1,24 @@
 -- Let's find our best selling sentiment category and the occasion that produces the most sales in that category.
 
-SELECT cs.cardsentiment, COUNT(*) AS salescount
-FROM Sales AS s
-JOIN CardOccasion AS co
-ON  s.cardoccasion_id = co.cardoccasion_id
-JOIN CardSentiment AS cs
-ON co.cardsentiment_id = cs.cardsentiment_id
+SELECT 
+    cs.cardsentiment, COUNT(*) AS salescount
+FROM
+    Sales AS s
+        JOIN
+    CardOccasion AS co ON s.cardoccasion_id = co.cardoccasion_id
+        JOIN
+    CardSentiment AS cs ON co.cardsentiment_id = cs.cardsentiment_id
 GROUP BY cs.cardsentiment
 ORDER BY salescount DESC;
 
 -- As New beginnings (id=3) is our highest selling sentiment with sales count of 348, which occasion is most popular in that range?
 
-SELECT co.occasion, COUNT(*) AS salescount, co.cardsentiment_id
-FROM Sales AS s
-JOIN CardOccasion AS co
-ON  s.cardoccasion_id = co.cardoccasion_id
+SELECT 
+    co.occasion, COUNT(*) AS salescount, co.cardsentiment_id
+FROM
+    Sales AS s
+        JOIN
+    CardOccasion AS co ON s.cardoccasion_id = co.cardoccasion_id
 GROUP BY co.cardoccasion_id
 HAVING co.cardsentiment_id = 3
 ORDER BY salescount DESC;
@@ -45,15 +49,20 @@ END //
 
 -- Order 981 says his order hasn't arrived let's check expected time
 
-SELECT sales_id, timestamp, EstimatedDelivery(postage_id, timestamp) AS expected_delivery_date
-FROM sales
-WHERE sales_id = 981;
+SELECT 
+    sales_id,
+    timestamp,
+    ESTIMATEDDELIVERY(postage_id, timestamp) AS expected_delivery_date
+FROM
+    sales
+WHERE
+    sales_id = 981;
 
 -- It is showing as late, so we will refund the customer and start a claim with Royal Mail
 
 -- Stored Procedure: Customer Order History
 
-SELECT s.sales_id, s.customer_id, (cs.cardprice + IFNULL(g.giftprice,0) + p.postageprice) AS OrderTotal
+SELECT s.timestamp, s.sales_id, s.customer_id, (cs.cardprice + IFNULL(g.giftprice,0) + p.postageprice) AS OrderTotal
 FROM Sales AS s
 JOIN CardSize AS cs
 ON s.cardsize_id  = cs.cardsize_id
@@ -65,17 +74,17 @@ WHERE s.customer_id = 31;
 
 DELIMITER //
 
-CREATE PROCEDURE CustomerHistory(IN customer_id INT)
+CREATE PROCEDURE CustomerHistory(IN customerId INT)
 BEGIN
-SELECT s.sales_id, s.customer_id, (cs.cardprice + IFNULL(g.giftprice,0) + p.postageprice) AS OrderTotal
-FROM Sales AS s
-JOIN CardSize AS cs
-ON s.cardsize_id  = cs.cardsize_id
-LEFT JOIN Gift AS g
-ON s.gift_id = g.gift_id
-JOIN postage AS p
-ON s.postage_id = p.postage_id
-ORDER BY s.sales_id;
+    SELECT s.timestamp, 
+           s.sales_id, 
+           s.customer_id, 
+           (cs.cardprice + IFNULL(g.giftprice, 0) + p.postageprice) AS OrderTotal
+    FROM Sales AS s
+    JOIN CardSize AS cs ON s.cardsize_id = cs.cardsize_id
+    LEFT JOIN Gift AS g ON s.gift_id = g.gift_id
+    JOIN postage AS p ON s.postage_id = p.postage_id
+    WHERE s.customer_id = customerId;
 END //
 
 DELIMITER ;
@@ -107,16 +116,16 @@ STARTS CURDATE() + INTERVAL 1 DAY
 DO BEGIN
 	INSERT INTO DailySalesReport(reportdate, salescount, salesrevenue)
     SELECT 
-        CURDATE() - INTERVAL 1 DAY, 
-        COUNT(*) AS total_sales, 
-        SUM(cs.cardprice + IFNULL(g.giftprice, 0)) AS total_revenue
+        CURDATE() - INTERVAL 1 DAY AS reportdate,
+        COUNT(*) AS salescount, 
+        SUM(cs.cardprice + IFNULL(g.giftprice, 0)) AS salesrevenue
     FROM Sales AS s
     JOIN CardSize AS cs 
     ON s.cardsize_id = cs.cardsize_id
     LEFT JOIN Gift AS g 
-    ON s.gift_id = g.gift_id;
+    ON s.gift_id = g.gift_id
+    WHERE DATE(s.timestamp) = CURDATE() - INTERVAL 1 DAY;
 END//
 
 DELIMITER ;
-
 
