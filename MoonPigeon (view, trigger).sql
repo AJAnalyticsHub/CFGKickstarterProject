@@ -46,7 +46,7 @@ DELETE FROM Customers WHERE customer_id=101; -- to demonstrate --
 -- Suggestions --
 -- ----------- -- 
 
--- Would it be easier to put which section the gift comes from rather than its id?
+-- Would it be easier to understand if we put which section the gift comes from rather than its id?
 
 CREATE VIEW vw_package_adress AS
 SELECT s.sales_id, c.first_name, c.last_name, c.house_number, c.street, c.town, c.postcode, g.giftsection, g.gifttype
