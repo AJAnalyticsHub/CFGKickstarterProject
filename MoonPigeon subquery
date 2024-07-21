@@ -1,0 +1,12 @@
+USE onlinecardretailer;
+
+SELECT COUNT(Sales_id) FROM Sales
+WHERE CardOccasion = 23
+IN (SELECT sales_id FROM Sales WHERE adtarget = 1);
+
+
+-- i think this is the corerct one, im not sure --
+SELECT 
+    COUNT(*) AS NumberOfSales
+FROM 
+    (SELECT sales_id FROM Sales WHERE adtarget = 1 AND cardoccasion = 23) AS valentines_ad_success;
